@@ -1,19 +1,17 @@
-const axios = require('axios')
-const cheerio = require('cheerio')
+const express = require('express')
+const getUSStates = require('./getUSStates')
 
-const page_url = 'https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States'
+const app = express()
 
-async function getUSStates(){
-  const { data } = await axios.get(page_url)
-  const $ = cheerio.load(data)
-  const table = $('caption:contains("States of the United States")').parent()
-  const states = []
-  table.find('tbody tr').slice(2).each((i, element) => {
-    const $element = $(element)
-    const state = {}
-    state.name = $($element.find('th a')[0]).text().trim() 
-  console.log(state)
-  }) 
-}
+app.use(express.static('public'))
 
-getUSStates()
+app.get('/api/states', async (req, res) => {
+  const states = await getUSStates()
+  res.json(states)
+})
+
+const port = process.env.PORT || 4242
+
+app.listen(port, () => {
+  console.log(`Listening at http://localhost:${port}`)
+})
